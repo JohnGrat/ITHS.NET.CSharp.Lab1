@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Drawing;
 using static System.Net.Mime.MediaTypeNames;
 
 
@@ -19,12 +20,12 @@ void PrintMatches(string text)
 
         if (!char.IsDigit(text[index])) continue;
 
-        string match = FindNextMatch(index, text);
+        Point matchPos = FindNextMatch(index, text);
 
         if (!string.IsNullOrEmpty(match))
         {
 
-            PrintCharathers(index, match.Length, text);
+            PrintCharathers(matchStart, matchEnd, text);
 
             sum = sum + long.Parse(match);
             Console.WriteLine();
@@ -39,7 +40,7 @@ bool IsInRange(int i, int index, int matchLength)
     return i < index || index + matchLength <= i;
 }
 
-string FindNextMatch(int start, string text)
+Point FindNextMatch(int start, string text)
 {
     for (int end = 1 + start; end < text.Length; end++)
     {
