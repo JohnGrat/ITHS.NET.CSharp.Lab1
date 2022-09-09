@@ -1,53 +1,73 @@
-﻿// See https://aka.ms/new-console-template for more information
-
-using System;
+﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using System.Reflection;
 using System.Text.RegularExpressions;
+using static System.Net.Mime.MediaTypeNames;
 
 
 PrintMatches("29535123p48723487597645723645");
 
-void PrintMatches(string originalText)
+void PrintMatches(string text)
 {
     long sum = 0;
-    NextMatch();
 
-    void NextMatch(int index = 0)
+    for (int index = 0; index < text.Length; index++)
     {
 
-        if (index == originalText.Length) return;
+        if (index == text.Length) break;
 
-        string text = originalText.Substring(index);
+        if (!char.IsDigit(text[index])) continue;
 
-        var firstChar = text.First();
+        string match = FindNextMatch(index, text);
 
-        string pattern = @$"^([{firstChar}])\d*?\1";
-        Regex rg = new Regex(pattern);
-
-        if (rg.IsMatch(text) && Char.IsDigit(firstChar))
+        if (!string.IsNullOrEmpty(match))
         {
-            var match = rg.Matches(text).FirstOrDefault();
 
-            sum = sum + long.Parse(match!.Value);
+            PrintCharathers(index, match.Length, text);
 
-            for (int i = 0; i < originalText.Length; i++)
-            {
-
-                if(i < index || index + match.Length <= i)
-                {
-                    Console.ForegroundColor = ConsoleColor.Gray;
-                }
-                else
-                {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                }
-                Console.Write(originalText[i]);
-
-            }
+            sum = sum + long.Parse(match);
             Console.WriteLine();
         }
-        NextMatch(index + 1);
     }
     Console.ForegroundColor = ConsoleColor.Gray;
     Console.WriteLine($"total value is:{sum}");
 }
+
+bool IsInRange(int i, int index, int matchLength)
+{
+    return i < index || index + matchLength <= i;
+}
+
+string FindNextMatch(int start, string text)
+{
+    for (int end = 1 + start; end < text.Length; end++)
+    {
+        string match = text.Substring(start, Math.Abs(start - end) + 1);
+
+        if (text[start] == text[end] && match.All(char.IsDigit))
+        {
+            return match;
+        }
+    }
+
+    return String.Empty;
+}
+
+void PrintCharathers(int start, int matchLength, string text)
+{
+    for (int i = 0; i < text.Length; i++)
+    {
+        if (IsInRange(i, start, matchLength))
+        {
+            Console.ForegroundColor = ConsoleColor.Gray;
+        }
+        else
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+        }
+        Console.Write(text[i]);
+    }
+}
+
+
