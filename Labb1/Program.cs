@@ -4,7 +4,6 @@ using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Drawing;
-using static System.Net.Mime.MediaTypeNames;
 
 
 PrintMatches("29535123p48723487597645723645");
@@ -13,21 +12,19 @@ void PrintMatches(string text)
 {
     long sum = 0;
 
-    for (int index = 0; index < text.Length; index++)
+    for (int i = 0; i < text.Length; i++)
     {
 
-        if (index == text.Length) break;
+        if (i == text.Length) break;
 
-        if (!char.IsDigit(text[index])) continue;
+        if (!char.IsDigit(text[i])) continue;
 
-        Point matchPos = FindNextMatch(index, text);
+        Match nextMatch = FindNextMatch(i, text);
 
-        if (!string.IsNullOrEmpty(match))
+        if (nextMatch is not null)
         {
-
-            PrintCharathers(matchStart, matchEnd, text);
-
-            sum = sum + long.Parse(match);
+            PrintCharathers(nextMatch, text);
+            sum = sum + nextMatch.Value;
             Console.WriteLine();
         }
     }
@@ -35,40 +32,47 @@ void PrintMatches(string text)
     Console.WriteLine($"total value is:{sum}");
 }
 
-bool IsInRange(int i, int index, int matchLength)
+bool InMatchRange(int index, Match match)
 {
-    return i < index || index + matchLength <= i;
+    return match.StartPos <= index && index <= match.StartPos + match.EndPos;
 }
 
-Point FindNextMatch(int start, string text)
+Match FindNextMatch(int index, string text)
 {
-    for (int end = 1 + start; end < text.Length; end++)
+    for (int i = index + 1; i < text.Length; i++)
     {
-        string match = text.Substring(start, Math.Abs(start - end) + 1);
+        int matchLength = Math.Abs(index - i) + 1;
+        string match = text.Substring(index, matchLength);
 
-        if (text[start] == text[end] && match.All(char.IsDigit))
+        if (text[index] == text[i] && match.All(char.IsDigit))
         {
-            return match;
+            return new Match() { StartPos = index, EndPos = matchLength - 1, Value = long.Parse(match) };
         }
     }
 
-    return String.Empty;
+    return null;
 }
 
-void PrintCharathers(int start, int matchLength, string text)
+void PrintCharathers(Match match, string text)
 {
     for (int i = 0; i < text.Length; i++)
     {
-        if (IsInRange(i, start, matchLength))
+        if (InMatchRange(i, match))
         {
-            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.ForegroundColor = ConsoleColor.Red;
         }
         else
         {
-            Console.ForegroundColor = ConsoleColor.Red;
+            Console.ForegroundColor = ConsoleColor.Gray;
         }
         Console.Write(text[i]);
     }
 }
 
 
+class Match
+{
+    public int StartPos { get; set; }
+    public int EndPos { get; set; }
+    public long Value { get; set; }
+}
