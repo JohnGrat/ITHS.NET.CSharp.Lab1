@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using System.Drawing;
 
 
+
 PrintMatches("29535123p48723487597645723645");
 
 void PrintMatches(string text)
@@ -15,16 +16,12 @@ void PrintMatches(string text)
     for (int i = 0; i < text.Length; i++)
     {
 
-        if (i == text.Length) break;
+        Match match = FindNextMatch(i, text);
 
-        if (!char.IsDigit(text[i])) continue;
-
-        Match nextMatch = FindNextMatch(i, text);
-
-        if (nextMatch is not null)
+        if (match is not null)
         {
-            PrintCharathers(nextMatch, text);
-            sum = sum + nextMatch.Value;
+            PrintCharathers(match, text);
+            sum = sum + match.Value;
             Console.WriteLine();
         }
     }
